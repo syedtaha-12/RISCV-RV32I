@@ -1,0 +1,20 @@
+vlib work
+vmap work work
+
+vlog pc.sv pc_tb.sv
+vsim -c pc_tb -do "run -all; quit"
+
+vlog adder_pc.sv adder_pc_tb.sv
+vsim -c adder_pc_tb -do "run -all; quit"
+
+vlog alu.sv alu_tb.sv
+vsim -c alu_tb -do "run -all; quit"
+
+vlog data_mem.sv data_mem_tb.sv
+vsim -c data_mem_tb -do "run -all; quit"
+
+vlog instr_mem.sv instr_mem_tb.sv
+vsim -c instr_mem_tb -do "run -all; quit"
+
+vlog register_file.sv registerItb.sv
+vsim -c register_file_tb -do "run -all; quit"
