@@ -18,3 +18,4 @@ vsim -c instr_mem_tb -do "run -all; quit"
 
 vlog register_file.sv registerItb.sv
 vsim -c register_file_tb -do "run -all; quit"
+
