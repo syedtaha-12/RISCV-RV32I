@@ -2,4 +2,5 @@ work/
 *.wlf
 transcript
 *.vstf
+terminal_commands.txt
 riscv_textbook.pdf
