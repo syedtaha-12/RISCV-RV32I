@@ -52,7 +52,7 @@ module imm_gen_tb;
 
         // ---------- B-type ----------
         // BEQ x1, x2, +8   (imm = 8, bit0 always 0)
-        // imm[12|10:5|4:1|11] = 0|000000|0100|0 = 0000000001000 (after re-arranging [11:0]) = 8
+        // imm[12|10:5|4:1|11] = 0|000000|0100|0 = 0000000001000 (after re-arranging [11:0]) = 8 in decimal
         check(32'b0_000000_00010_00001_000_0100_0_1100011, 32'd8, 3'd2, "B-type positive (BEQ +8)");
 
         // BEQ x1, x2, -8   (imm = -8)
