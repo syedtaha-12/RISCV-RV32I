@@ -5,13 +5,11 @@ module alu_input_a_mux (
     output logic [31:0] out
 );
 
-   localparam [31:0] zero = 32'd0;
-
     always_comb begin
         case (alu_a_sel) 
             2'b00: out = rs1;
             2'b01: out = pc;
-            2'b10: out = zero;
+            2'b10: out = 32'd0;
             
             default: out = rs1;
         endcase 
