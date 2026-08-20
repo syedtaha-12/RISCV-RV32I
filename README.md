@@ -17,15 +17,17 @@ I'm building this to go deep on digital design and verification, the way it's ac
 | `pc.sv` | Program counter | ✅ Verified |
 | `adder_pc.sv` | PC+4 / branch target adder | ✅ Verified |
 | `alu.sv` | Arithmetic logic unit | ✅ Verified |
-| `register_file.sv` | 32×32-bit register file | ✅ Verified |
+| `register.sv` | 32×32-bit register file | ✅ Verified |
 | `instr_mem.sv` | Instruction memory (hex-loaded) | ✅ Verified |
 | `data_mem.sv` | Data memory | ✅ Verified |
 | `imm_gen.sv` | Immediate generator (I/S/B/U/J types) | ✅ Verified |
 | `control.sv` | Main control unit | ✅ Verified |
 | `alu_control.sv` | ALU operation decoder | ✅ Verified |
 | `alu_input_a_mux.sv` | ALU input A select mux | ✅ Verified |
+| `alu_input_b_mux.sv` | ALU input B select mux | ✅ Verified |
 | `wb_mux.sv` | Writeback select mux | ✅ Verified |
 | `load_extend.sv` | Load sign/zero-extension (LB/LH/LW/LBU/LHU) | ✅ Verified |
+| `branch_comparator.sv` | Branch condition evaluator (BEQ/BNE/BLT/BGE/BLTU/BGEU) | ✅ Verified |
 
 **Next steps:** wire the full single-cycle datapath, then add a top-level integration testbench running real RV32I test programs. Going forward, new modules also get functional coverage (SystemVerilog covergroups) and SVA assertions alongside directed tests — not just pass/fail testbenches.
 
