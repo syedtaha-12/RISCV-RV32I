@@ -18,23 +18,36 @@ module branch_comparator_tb;
         .branch_taken(branch_taken)
     );
 
-    covergroup branch_cg;
+    // ---- Functional coverage ----
+    // Tracks whether every branch type (funct3) and every outcome
+    // (branch_taken = 0/1) has actually been hit by our directed tests.
+    // This doesn't check correctness (assert/check() already do that) -
+    // it checks that our test list didn't forget a case.
+    covergroup branch_cg @(posedge dummy_clk);
+        // dummy_clk is a manual trigger (see sample() call below) since
+        // this DUT is combinational and has no real clock.
+
         cp_funct3: coverpoint funct3 {
-            bins beq = {3'b000};
-            bins bne = {3'b001};
-            bins blt = {3'b100};
-            bins bge = {3'b101};
+            bins beq  = {3'b000};
+            bins bne  = {3'b001};
+            bins blt  = {3'b100};
+            bins bge  = {3'b101};
             bins bltu = {3'b110};
             bins bgeu = {3'b111};
         }
 
         cp_taken: coverpoint branch_taken {
             bins not_taken = {1'b0};
-            bins taken = {1'b1};
+            bins taken     = {1'b1};
         }
-    endgroup 
 
-    branch_cg cg_inst = new();
+        // Cross: make sure we've seen both taken and not-taken
+        // for each branch type, not just each independently.
+        cross_funct3_taken: cross cp_funct3, cp_taken;
+    endgroup
+
+    logic dummy_clk; // never toggled - covergroup sampled manually via .sample()
+    branch_cg cg = new();
 
     task check(string test_name, logic [31:0] a, logic [31:0] b, logic [2:0] f3, logic expected);
         rs1_data = a;
@@ -42,7 +55,8 @@ module branch_comparator_tb;
         funct3 = f3;
         #1;
 
-        cg_inst.sample();
+        assert (!$isunknown(branch_taken))
+        else $error("branch_taken is unknown/X!");
 
         if (branch_taken !== expected) begin
             $display("FAIL [%s]: got branch_taken=%b, expected=%b", test_name, branch_taken, expected);
@@ -50,6 +64,8 @@ module branch_comparator_tb;
         end else begin
             $display("PASS [%s]", test_name);
         end
+
+        cg.sample(); // manually sample coverage after each check
     endtask
 
     initial begin
@@ -84,6 +100,8 @@ module branch_comparator_tb;
             $display("ALL TESTS PASSED");
         else
             $display("%0d TEST(S) FAILED", errors);
+
+        $display("Coverage = %0.2f%%", cg.get_coverage());
 
         $finish;
     end
