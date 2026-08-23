@@ -14,8 +14,8 @@ module control (
     output logic [1:0] wb_sel,      // 00 = ALU result, 01 = mem data, 10 = PC+4
     output logic       alu_src,     // 1 = ALU input B is the immediate, 0 = it's rs2
     output logic [1:0] alu_a_sel,   // 00 = rs1, 01 = PC, 10 = constant 0
-    output logic       branch,      // 1 = this is a conditional branch
-    output logic       jump,        // 1 = this is an unconditional jump (JAL/JALR)
+    output logic       branch_inst,      // 1 = this is a conditional branch
+    output logic       jump_inst,        // 1 = this is an unconditional jump (JAL/JALR)
     output logic [2:0] alu_op       // rough category, refined later by alu_control
 );
 
@@ -44,8 +44,8 @@ module control (
         wb_sel     = 2'b00;
         alu_src    = 1'b0;
         alu_a_sel  = 2'b00;
-        branch     = 1'b0;
-        jump       = 1'b0;
+        branch_inst     = 1'b0;
+        jump_inst       = 1'b0;
         alu_op     = 3'b000;
 
         case (opcode)
@@ -85,14 +85,14 @@ module control (
             7'b1100011: begin // BRANCH (BEQ/BNE/BLT/...)
                 alu_src   = 1'b0;  // compare rs1 vs rs2
                 alu_a_sel = 2'b00; // ALU input A = rs1
-                branch    = 1'b1;
+                branch_inst    = 1'b1;
                 alu_op    = 3'b001; // ALU subtracts to compare
                 // reg_write stays 0 - branches don't write a register
             end
 
             7'b1101111: begin // JAL
                 reg_write = 1'b1;
-                jump      = 1'b1;
+                jump_inst      = 1'b1;
                 wb_sel    = 2'b10; // writeback = PC+4
                 // alu_a_sel/alu_op don't matter here - JAL's target comes
                 // from a separate PC+imm adder, not the main ALU
@@ -102,7 +102,7 @@ module control (
                 reg_write = 1'b1;
                 alu_src   = 1'b1; // target = rs1 + imm
                 alu_a_sel = 2'b00; // ALU input A = rs1
-                jump      = 1'b1;
+                jump_inst = 1'b1;
                 wb_sel    = 2'b10; // writeback = PC+4
                 alu_op    = 3'b000;
             end
@@ -131,8 +131,8 @@ module control (
                 wb_sel    = 2'b00;
                 alu_src   = 1'b0;
                 alu_a_sel = 2'b00;
-                branch    = 1'b0;
-                jump      = 1'b0;
+                branch_inst = 1'b0;
+                jump_inst   = 1'b0;
                 alu_op    = 3'b000;
             end
         endcase
