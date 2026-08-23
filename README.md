@@ -10,12 +10,12 @@ I'm building this to go deep on digital design and verification, the way it's ac
 
 ## Status
 
-**In progress — control logic complete, datapath integration next.**
+**Single-cycle datapath wired end-to-end in `rv32i_top.sv` — integration testbench next.**
 
 | Module | Purpose | Status |
 |---|---|---|
 | `pc.sv` | Program counter | ✅ Verified |
-| `adder_pc.sv` | PC+4 / branch target adder | ✅ Verified |
+| `adder_pc.sv` | PC+4 adder | ✅ Verified |
 | `alu.sv` | Arithmetic logic unit | ✅ Verified |
 | `register.sv` | 32×32-bit register file | ✅ Verified |
 | `instr_mem.sv` | Instruction memory (hex-loaded) | ✅ Verified |
@@ -28,8 +28,12 @@ I'm building this to go deep on digital design and verification, the way it's ac
 | `wb_mux.sv` | Writeback select mux | ✅ Verified |
 | `load_extend.sv` | Load sign/zero-extension (LB/LH/LW/LBU/LHU) | ✅ Verified |
 | `branch_comparator.sv` | Branch condition evaluator (BEQ/BNE/BLT/BGE/BLTU/BGEU) | ✅ Verified |
+| `branch_jump_target_adder.sv` | Branch/JAL target adder (PC + immediate) | ✅ Verified |
+| `next_pc_select_logic.sv` | Picks jump vs. taken-branch vs. PC+4 (priority order) | ✅ Verified |
+| `next_pc_mux.sv` | Next-PC mux — output feeds back into `pc.sv` | ✅ Verified |
+| `rv32i_top.sv` | Full single-cycle datapath — instantiates and wires every module above | 🔧 Wired, compiles clean in Questa; no integration testbench yet |
 
-**Next steps:** wire the full single-cycle datapath, then add a top-level integration testbench running real RV32I test programs. Going forward, new modules also get functional coverage (SystemVerilog covergroups) and SVA assertions alongside directed tests — not just pass/fail testbenches.
+**Next steps:** write a top-level integration testbench for `rv32i_top.sv` that runs real RV32I instruction sequences through `instr_mem_init.hex` and checks register/memory state end-to-end. Going forward, new modules also get functional coverage (SystemVerilog covergroups) and SVA assertions alongside directed tests — not just pass/fail testbenches.
 
 ## Repository structure
 
@@ -47,6 +51,14 @@ Every module has its own self-checking testbench, simulated in Questa. Testing g
 Starting with the current stage of the project, modules also get:
 - **Functional coverage** — covergroups tracking that meaningful input combinations and corner cases are actually exercised, not just tested once.
 - **SystemVerilog assertions (SVA)** — checking design invariants continuously during simulation (e.g. register x0 always reads zero, PC only changes in valid ways).
+
+### Known tooling limitation
+
+This Questa Starter FPGA Edition install doesn't have the `svverification` license feature checked out, which covergroups need at simulation runtime (`vsim` fails immediately with `Unable to checkout verification license`, before any test runs). It only affects `tb/branch_comparator_tb.sv` — the one testbench so far that uses a covergroup — and the covergroup there is commented out for now so the rest of the testbench can run.
+
+The directed tests and assertions don't need that license and are unaffected: `branch_comparator.sv` is fully verified — all 14 directed tests pass (BEQ/BNE/BLT/BGE/BLTU/BGEU, both taken and not-taken, plus signed/unsigned edge cases), 0 errors, 0 warnings.
+
+For reference, if the license issue is resolved and the covergroup is switched back on, coverage is expected to come back at **100%** — the directed tests already exercise every `cp_funct3` bin (all six branch types) and every `cp_taken` outcome, so all 12 `cross_funct3_taken` bins (6 branch types × taken/not-taken) get hit.
 
 ## Tools
 

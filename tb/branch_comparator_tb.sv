@@ -19,6 +19,16 @@ module branch_comparator_tb;
     );
 
     // ---- Functional coverage ----
+    // Commented out: this Questa Starter FPGA Edition install doesn't have
+    // the svverification license feature checked out, which covergroups
+    // require at simulation runtime (vsim errors out with "Unable to
+    // checkout verification license" before any test even runs). The
+    // directed tests below are unaffected - they don't need that license -
+    // and all still pass. See README.md "Known tooling limitation" for
+    // what this coverage was expected to report once available.
+    /*
+    logic dummy_clk; // never toggled - covergroup sampled manually via .sample()
+
     // Tracks whether every branch type (funct3) and every outcome
     // (branch_taken = 0/1) has actually been hit by our directed tests.
     // This doesn't check correctness (assert/check() already do that) -
@@ -46,8 +56,8 @@ module branch_comparator_tb;
         cross_funct3_taken: cross cp_funct3, cp_taken;
     endgroup
 
-    logic dummy_clk; // never toggled - covergroup sampled manually via .sample()
     branch_cg cg = new();
+    */
 
     task check(string test_name, logic [31:0] a, logic [31:0] b, logic [2:0] f3, logic expected);
         rs1_data = a;
@@ -65,7 +75,7 @@ module branch_comparator_tb;
             $display("PASS [%s]", test_name);
         end
 
-        cg.sample(); // manually sample coverage after each check
+        // cg.sample(); // manually sample coverage after each check (see note above)
     endtask
 
     initial begin
@@ -101,7 +111,7 @@ module branch_comparator_tb;
         else
             $display("%0d TEST(S) FAILED", errors);
 
-        $display("Coverage = %0.2f%%", cg.get_coverage());
+        // $display("Coverage = %0.2f%%", cg.get_coverage()); // see note above
 
         $finish;
     end
