@@ -17,7 +17,7 @@ module register_tb;
     // Behavioral model mirroring the DUT, used as the reference
     logic [31:0] model [31:0];
 
-    register_file dut (
+    register dut (
         .clk(clk),
         .we(we),
         .rs1_addr(rs1_addr),
