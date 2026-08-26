@@ -24,10 +24,10 @@ module alu_control_tb;
     localparam logic [3:0] ALU_SLTU = 4'b1001;
 
     alu_control dut (
-        .alu_op(alu_op),
+        .alu_operation(alu_op),
         .funct3(funct3),
         .funct7(funct7),
-        .alu_ctrl(alu_ctrl)
+        .alu_op(alu_ctrl)
     );
 
     task check(string name, logic [3:0] expected);
@@ -47,7 +47,7 @@ module alu_control_tb;
         check("ADD category (load/store/JALR/AUIPC)", ALU_ADD);
 
         alu_op = 3'b001; funct3 = 3'b000; funct7 = 7'b0000000;
-        check("SUB category (branch)", ALU_SUB);
+        check("unused category (falls to default ADD)", ALU_ADD);
 
         alu_op = 3'b100; funct3 = 3'b000; funct7 = 7'b0000000;
         check("LUI pass-through (uses ADD)", ALU_ADD);

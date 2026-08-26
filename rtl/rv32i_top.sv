@@ -58,7 +58,7 @@ module rv32i_top (
     logic       branch_inst_bool;
     logic       jal_inst_bool;
     logic       jalr_inst_bool;
-    logic [2:0] alu_op_code;
+    logic [2:0] alu_operation;
 
     control ctrl (
         .opcode      (opcode),
@@ -71,7 +71,7 @@ module rv32i_top (
         .branch_inst_bool (branch_inst_bool),
         .jal_inst_bool   (jal_inst_bool),
         .jalr_inst_bool   (jalr_inst_bool),
-        .alu_op      (alu_op_code)
+        .alu_operation      (alu_operation)
     );
 
     // ---------------- Immediate generator ----------------
@@ -101,13 +101,13 @@ module rv32i_top (
     );
 
     // ---------------- ALU control ----------------
-    logic [3:0] alu_ctrl;
+    logic [3:0] alu_op;
 
     alu_control aluctrl (
-        .alu_op   (alu_op_code),
+        .alu_operation  (alu_operation),
         .funct3   (funct3),
         .funct7   (funct7),
-        .alu_ctrl (alu_ctrl)
+        .alu_op (alu_op)
     );
 
     // ---------------- ALU input muxes ----------------
@@ -135,7 +135,7 @@ module rv32i_top (
     alu alu_unit (
         .a       (alu_in_a),
         .b       (alu_in_b),
-        .alu_op  (alu_ctrl),
+        .alu_op  (alu_op),
         .alu_out (alu_result),
         .zero    (alu_zero)
     );

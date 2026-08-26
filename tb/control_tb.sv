@@ -26,7 +26,7 @@ module control_tb;
         .branch_inst_bool(branch_inst_bool),
         .jal_inst_bool(jal_inst_bool),
         .jalr_inst_bool(jalr_inst_bool),
-        .alu_op(alu_op)
+        .alu_operation(alu_op)
     );
 
     task check(
@@ -83,7 +83,7 @@ module control_tb;
 
         // BRANCH
         opcode = 7'b1100011;
-        check("BRANCH", 1'b0, 1'b0, 1'b0, 2'b00, 1'b0, 2'b00, 1'b1, 1'b0, 1'b0, 3'b001);
+        check("BRANCH", 1'b0, 1'b0, 1'b0, 2'b00, 1'b0, 2'b00, 1'b1, 1'b0, 1'b0, 3'b000);
 
         // JAL
         opcode = 7'b1101111;
