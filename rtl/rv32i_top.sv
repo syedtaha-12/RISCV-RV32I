@@ -2,7 +2,9 @@
 // Single-cycle RV32I datapath - wires together every verified module
 // into one instruction-per-clock core.
 
-module rv32i_top (
+module rv32i_top #(
+    parameter string INSTR_INIT_FILE = "instr_mem_init.hex"
+) (
     input logic clk,
     input logic reset
 );
@@ -28,7 +30,9 @@ module rv32i_top (
     // ---------------- Fetch ----------------
     logic [31:0] instr;
 
-    instr_mem imem (
+    instr_mem #(
+        .INIT_FILE (INSTR_INIT_FILE)
+    ) imem (
         .addr      (pc_current),
         .instr_out (instr)
     );

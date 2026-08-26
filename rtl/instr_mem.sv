@@ -1,5 +1,6 @@
 module instr_mem #(
-    parameter MEM_SIZE = 256
+    parameter MEM_SIZE = 256,
+    parameter string INIT_FILE = "instr_mem_init.hex"
 ) (
     input  logic [31:0] addr,
     output logic [31:0] instr_out
@@ -15,7 +16,7 @@ module instr_mem #(
     };
 
     initial begin
-        $readmemh("instr_mem_init.hex", mem);
+        $readmemh(INIT_FILE, mem);
     end
 
 endmodule
