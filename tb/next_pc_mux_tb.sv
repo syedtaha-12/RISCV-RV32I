@@ -43,7 +43,7 @@ module next_pc_mux_tb;
 
         check("Output branch/JAL target", 32'hDEADBEEF, 32'hCAFEF00D, 32'hABCDABCD, 2'b01, 32'hCAFEF00D);
 
-        check("Output JALR target", 32'hDEADBEEF, 32'hCAFEF00D, 32'hABCDABCD, 2'b10, 32'hABCDABCD);
+        check("Output JALR target (LSB cleared)", 32'hDEADBEEF, 32'hCAFEF00D, 32'hABCDABCD, 2'b10, 32'hABCDABCC);
 
         check("Default case (unused select 11)", 32'hDEADBEEF, 32'hCAFEF00D, 32'hABCDABCD, 2'b11, 32'hDEADBEEF);
 

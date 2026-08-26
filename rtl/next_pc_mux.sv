@@ -11,7 +11,7 @@ module next_pc_mux (
         case(next_pc_select)
             2'b00: next_pc_out = pc_plus4_inst_address;
             2'b01: next_pc_out = branch_jal_inst_address;
-            2'b10: next_pc_out = jalr_inst_address;
+            2'b10: next_pc_out = {jalr_inst_address[31:1], 1'b0}; // JALR must clear bit 0 per spec
 
             default: next_pc_out = pc_plus4_inst_address;
         endcase 
