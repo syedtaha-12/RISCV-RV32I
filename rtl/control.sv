@@ -12,10 +12,11 @@ module control (
     output logic       mem_read,    // 1 = this is a load
     output logic       mem_write,   // 1 = this is a store
     output logic [1:0] wb_sel,      // 00 = ALU result, 01 = mem data, 10 = PC+4
-    output logic       alu_src,     // 1 = ALU input B is the immediate, 0 = it's rs2
+    output logic       alu_b_sel,     // 1 = ALU input B is the immediate, 0 = it's rs2
     output logic [1:0] alu_a_sel,   // 00 = rs1, 01 = PC, 10 = constant 0
-    output logic       branch_inst,      // 1 = this is a conditional branch
-    output logic       jump_inst,        // 1 = this is an unconditional jump (JAL/JALR)
+    output logic       branch_inst_bool,      // 1 = this is a conditional branch
+    output logic       jal_inst_bool,
+    output logic       jalr_inst_bool,        // 1 = this is an unconditional jump (JAL/JALR)
     output logic [2:0] alu_op       // rough category, refined later by alu_control
 );
 
@@ -42,16 +43,17 @@ module control (
         mem_read   = 1'b0;
         mem_write  = 1'b0;
         wb_sel     = 2'b00;
-        alu_src    = 1'b0;
+        alu_b_sel    = 1'b0;
         alu_a_sel  = 2'b00;
-        branch_inst     = 1'b0;
-        jump_inst       = 1'b0;
+        branch_inst_bool  = 1'b0;
+        jal_inst_bool     = 1'b0;
+        jalr_inst_bool    = 1'b0;
         alu_op     = 3'b000;
 
         case (opcode)
             7'b0110011: begin // R-type (ADD, SUB, AND, OR, ...)
                 reg_write = 1'b1;
-                alu_src   = 1'b0; // ALU input B = rs2
+                alu_b_sel   = 1'b0; // ALU input B = rs2
                 alu_a_sel = 2'b00; // ALU input A = rs1
                 wb_sel    = 2'b00; // writeback from ALU
                 alu_op    = 3'b010;
@@ -59,7 +61,7 @@ module control (
 
             7'b0010011: begin // I-type ALU-immediate (ADDI, ANDI, ...)
                 reg_write = 1'b1;
-                alu_src   = 1'b1; // ALU input B = immediate
+                alu_b_sel   = 1'b1; // ALU input B = immediate
                 alu_a_sel = 2'b00; // ALU input A = rs1
                 wb_sel    = 2'b00;
                 alu_op    = 3'b011;
@@ -67,7 +69,7 @@ module control (
 
             7'b0000011: begin // LOAD (LB/LH/LW/LBU/LHU)
                 reg_write = 1'b1;
-                alu_src   = 1'b1; // address = rs1 + imm
+                alu_b_sel   = 1'b1; // address = rs1 + imm
                 alu_a_sel = 2'b00; // ALU input A = rs1
                 mem_read  = 1'b1;
                 wb_sel    = 2'b01; // writeback from data_mem
@@ -75,7 +77,7 @@ module control (
             end
 
             7'b0100011: begin // STORE (SB/SH/SW)
-                alu_src   = 1'b1; // address = rs1 + imm
+                alu_b_sel   = 1'b1; // address = rs1 + imm
                 alu_a_sel = 2'b00; // ALU input A = rs1
                 mem_write = 1'b1;
                 alu_op    = 3'b000; // ALU just adds for the address
@@ -83,16 +85,16 @@ module control (
             end
 
             7'b1100011: begin // BRANCH (BEQ/BNE/BLT/...)
-                alu_src   = 1'b0;  // compare rs1 vs rs2
+                alu_b_sel   = 1'b0;  // compare rs1 vs rs2
                 alu_a_sel = 2'b00; // ALU input A = rs1
-                branch_inst    = 1'b1;
+                branch_inst_bool   = 1'b1;
                 alu_op    = 3'b001; // ALU subtracts to compare
                 // reg_write stays 0 - branches don't write a register
             end
 
             7'b1101111: begin // JAL
                 reg_write = 1'b1;
-                jump_inst      = 1'b1;
+                jal_inst_bool      = 1'b1;
                 wb_sel    = 2'b10; // writeback = PC+4
                 // alu_a_sel/alu_op don't matter here - JAL's target comes
                 // from a separate PC+imm adder, not the main ALU
@@ -100,16 +102,16 @@ module control (
 
             7'b1100111: begin // JALR
                 reg_write = 1'b1;
-                alu_src   = 1'b1; // target = rs1 + imm
+                alu_b_sel   = 1'b1; // target = rs1 + imm
                 alu_a_sel = 2'b00; // ALU input A = rs1
-                jump_inst = 1'b1;
+                jalr_inst_bool = 1'b1;
                 wb_sel    = 2'b10; // writeback = PC+4
                 alu_op    = 3'b000;
             end
 
             7'b0110111: begin // LUI
                 reg_write = 1'b1;
-                alu_src   = 1'b1; // ALU input B = immediate
+                alu_b_sel   = 1'b1; // ALU input B = immediate
                 alu_a_sel = 2'b10; // ALU input A = constant 0
                 wb_sel    = 2'b00; // writeback from ALU (pass-through result)
                 alu_op    = 3'b100; // tells alu_control: just pass B through
@@ -117,7 +119,7 @@ module control (
 
             7'b0010111: begin // AUIPC
                 reg_write = 1'b1;
-                alu_src   = 1'b1; // ALU input B = immediate
+                alu_b_sel   = 1'b1; // ALU input B = immediate
                 alu_a_sel = 2'b01; // ALU input A = PC
                 wb_sel    = 2'b00;
                 alu_op    = 3'b000; // ADD
@@ -129,10 +131,11 @@ module control (
                 mem_read  = 1'b0;
                 mem_write = 1'b0;
                 wb_sel    = 2'b00;
-                alu_src   = 1'b0;
+                alu_b_sel   = 1'b0;
                 alu_a_sel = 2'b00;
-                branch_inst = 1'b0;
-                jump_inst   = 1'b0;
+                branch_inst_bool = 1'b0;
+                jal_inst_bool   = 1'b0;
+                jalr_inst_bool   = 1'b0;
                 alu_op    = 3'b000;
             end
         endcase

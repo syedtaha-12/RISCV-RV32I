@@ -53,10 +53,11 @@ module rv32i_top (
     logic       mem_read;
     logic       mem_write;
     logic [1:0] wb_sel;
-    logic       alu_src;
+    logic       alu_b_sel;
     logic [1:0] alu_a_sel;
-    logic       branch_inst;
-    logic       jump_inst;
+    logic       branch_inst_bool;
+    logic       jal_inst_bool;
+    logic       jalr_inst_bool;
     logic [2:0] alu_op_code;
 
     control ctrl (
@@ -65,10 +66,11 @@ module rv32i_top (
         .mem_read    (mem_read),
         .mem_write   (mem_write),
         .wb_sel      (wb_sel),
-        .alu_src     (alu_src),
+        .alu_b_sel     (alu_b_sel),
         .alu_a_sel   (alu_a_sel),
-        .branch_inst (branch_inst),
-        .jump_inst   (jump_inst),
+        .branch_inst_bool (branch_inst_bool),
+        .jal_inst_bool   (jal_inst_bool),
+        .jalr_inst_bool   (jalr_inst_bool),
         .alu_op      (alu_op_code)
     );
 
@@ -122,7 +124,7 @@ module rv32i_top (
     alu_input_b_mux b_mux (
         .rs2     (rs2_data),
         .imm     (imm),
-        .alu_src (alu_src),
+        .alu_b_sel (alu_b_sel),
         .out     (alu_in_b)
     );
 
@@ -157,28 +159,21 @@ module rv32i_top (
         .pc_plus_immediate (pc_plus_imm)
     );
 
-    // JALR's target is rs1 + imm, which the shared ALU already computes
-    // (control sets alu_a_sel=rs1, alu_src=imm for opcode 1100111).
-    // JAL's target is pc + imm, from the adder above. Pick per opcode.
-    logic [31:0] jump_target;
-    localparam logic [6:0] OPCODE_JALR = 7'b1100111;
-
-    assign jump_target = (opcode == OPCODE_JALR) ? alu_result : pc_plus_imm;
-
     // ---------------- Next-PC selection ----------------
     logic [1:0] next_pc_sel;
 
     next_pc_select_logic pcsel (
-        .branch_inst_bool (branch_inst),
-        .jump_inst_bool   (jump_inst),
+        .branch_inst_bool (branch_inst_bool),
+        .jal_inst_bool (jal_inst_bool),
+        .jalr_inst_bool   (jalr_inst_bool),
         .branch_taken     (branch_taken),
         .next_pc_select   (next_pc_sel)
     );
 
     next_pc_mux pcmux (
         .pc_plus4_inst_address (pc_plus4),
-        .branch_inst_address   (pc_plus_imm),
-        .jump_inst_address     (jump_target),
+        .branch_jal_inst_address   (pc_plus_imm),
+        .jalr_inst_address     (alu_result),
         .next_pc_select        (next_pc_sel),
         .next_pc_out           (next_pc)
     );

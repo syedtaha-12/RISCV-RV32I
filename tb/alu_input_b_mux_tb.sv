@@ -6,7 +6,7 @@ module alu_input_b_mux_tb;
 
     logic [31:0] rs2;
     logic [31:0] imm;
-    logic        alu_src;
+    logic        alu_b_sel;
     logic [31:0] out;
 
     int errors = 0;
@@ -14,7 +14,7 @@ module alu_input_b_mux_tb;
     alu_input_b_mux dut (
         .rs2(rs2),
         .imm(imm),
-        .alu_src(alu_src),
+        .alu_b_sel(alu_b_sel),
         .out(out)
     );
 
@@ -33,15 +33,15 @@ module alu_input_b_mux_tb;
         rs2 = 32'hCAFE_BABE;
         imm = 32'h0000_0F00;
 
-        alu_src = 1'b0; check("select rs2", rs2);
-        alu_src = 1'b1; check("select imm", imm);
+        alu_b_sel = 1'b0; check("select rs2", rs2);
+        alu_b_sel = 1'b1; check("select imm", imm);
 
         // Re-check with different operand values to ensure no stale state
         rs2 = 32'h1111_2222;
         imm = 32'hFFFF_FFFF;
 
-        alu_src = 1'b0; check("select rs2 (2)", rs2);
-        alu_src = 1'b1; check("select imm (2)", imm);
+        alu_b_sel = 1'b0; check("select rs2 (2)", rs2);
+        alu_b_sel = 1'b1; check("select imm (2)", imm);
 
         if (errors == 0)
             $display("ALL TESTS PASSED");
