@@ -76,4 +76,4 @@ RV32I base integer instruction set (RISC-V).
 
 ---
 
-*This project is under active development as part of my preparation for hardware design and verification roles.*
+*This project is paused for now. Will start pipelining soon.*
