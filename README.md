@@ -1,6 +1,6 @@
 # RISC-V RV32I Core
 
-A single-cycle RV32I RISC-V processor core, written in SystemVerilog and verified with directed and coverage-driven testbenches for only the branch_comparator.tb in Questa.
+A single-cycle RV32I RISC-V processor core, written in SystemVerilog and verified with directed testbenches for all modules and an additional coverage-driven testbench for only the branch_comparator module in Questa.
 
 This project is a from-scratch build of the RV32I base integer instruction set. I designed, coded, and verified each module independently with a self-checking testbench before wiring it into the full datapath.
 
